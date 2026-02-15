@@ -147,6 +147,7 @@ exports.postReset = (req, res, next) => {
         })
         .then(result => {
         res.status(200).json({ message: 'Email found, you shortly receive an email containing a reset password link.' });
+        console.log(`${req.protocol}://${req.get('host')}`)
         resend.emails.send({
             to: [ email ],
             from: 'Strong Library <onboarding@resend.dev>',
