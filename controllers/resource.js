@@ -142,8 +142,8 @@ exports.getCheckout = (req, res, next) => {
                 }
             }),
             mode: 'payment',
-            success_url: 'http://127.0.0.1:5501/shop/checkout-success.html?resourceId=' + resourceId + '&returned=' + returned,
-            cancel_url: 'http://127.0.0.1:5501/shop/borrow.html'
+            success_url: `${req.get('origin')}/shop/checkout-success.html?resourceId=` + resourceId + '&returned=' + returned,
+            cancel_url: `${req.get('origin')}/shop/borrow.html`
         })
     })
     .then(session => {

@@ -1,6 +1,6 @@
 const dotenv = require('dotenv');
 const express = require('express');
-const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const mongoConnect = require('./util/database').mongoConnect;
 
@@ -11,17 +11,13 @@ const authRoutes = require('./routes/auth');
 dotenv.config();
 const app = express();
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'OPTIONS, GET, POST, PUT, PATCH, DELETE'
-  );
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
+app.use(cors({
+  origin: ["https://danielk111.github.io", "http://127.0.0.1:5500", "https://dnlkrm509.github.io"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
-app.use(bodyParser.json());
+app.use(express.json());
 
 
 app.use('/admin', adminRoutes);
