@@ -153,7 +153,7 @@ exports.postReset = (req, res, next) => {
             subject: 'Password Reset',
             html: `
                 <p>You requested password reset</p>
-                <p>Click this <a href="${req.get('origin')}/reset/${token}">link</a> to set a new password.</p>
+                <p>Click this <a href="${req.get('origin')}/individual-project-library-management-system-client/reset/${token}">link</a> to set a new password.</p>
             `
             });
         })
@@ -173,7 +173,7 @@ exports.getNewPassword = (req, res, next) => {
         if (!user) {
             return res.status(404).json({ message: 'No account found.' });
         }
-        res.redirect(`${req.get('origin')}/auth/new-password.html?token=${token}&userId=${user._id.toString()}`);
+        res.redirect(`${req.get('origin')}/individual-project-library-management-system-client/auth/new-password.html?token=${token}&userId=${user._id.toString()}`);
     })
     .catch(err => {
         const error = new Error(err);
@@ -206,7 +206,7 @@ exports.postNewPassword = (req, res, next) => {
         return newUser.save();
     })
     .then(result => {
-        res.status(200).json({ redirectUrl: `${req.get('origin')}/auth/login.html` });
+        res.status(200).json({ redirectUrl: `${req.get('origin')}/individual-project-library-management-system-client/auth/login.html` });
         resend.emails.send({
             to: [ resetUser.email ],
             from: 'Strong Library <onboarding@resend.dev>',
