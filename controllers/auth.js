@@ -174,7 +174,7 @@ exports.getNewPassword = (req, res, next) => {
         if (!user) {
             return res.status(404).json({ message: 'No account found.' });
         }
-        console.log(`{req.get('origin')}/individual-project-library-management-system-client/auth/new-password.html?token=${token}&userId=${user._id.toString()}`)
+        console.log(`${req.get('origin')}/individual-project-library-management-system-client/auth/new-password.html?token=${token}&userId=${user._id.toString()}`)
         res.redirect(`${req.get('origin')}/individual-project-library-management-system-client/auth/new-password.html?token=${token}&userId=${user._id.toString()}`);
     })
     .catch(err => {
