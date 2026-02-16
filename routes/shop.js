@@ -6,6 +6,8 @@ const resourceController = require('../controllers/resource');
 const isAuth = require('../middleware/is-auth');
 const optionalAuth = require('../middleware/optional-auth');
 
+router.get('/invoices/:filename', resourceController.getFile);
+
 router.get('/', optionalAuth, resourceController.getResources);
 router.get('/resources/:resourceId', optionalAuth, resourceController.getResource);
 

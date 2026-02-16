@@ -13,6 +13,28 @@ const BorrowedHistory = require('../models/borrowedHistory');
 
 const ITEMS_PER_PAGE = 6;
 
+exports.getFile = (req, res, next) => {
+    const filename = req.params.filename;
+    console.log(filename)
+    const filePath = path.join(__dirname, '..', 'invoices', filename);
+    
+    fs.stat(filePath, (err, data) => {
+        if (err) {
+            const error = new Error('An error occured in file system: ' + err);
+            error.statusCode = 404;
+            return next(error);
+        }
+
+        if(data.isFile()) {
+            res.sendFile(filePath);
+        } else {
+            const error = new Error('File not found');
+            error.statusCode = 404;
+            return next(error);
+        }
+    })
+}
+
 exports.getResources = (req, res, next) => {
     const page = +req.query.page || 1;
     let isAuthenticate = false;
