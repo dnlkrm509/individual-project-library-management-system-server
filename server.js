@@ -1,3 +1,5 @@
+const path = require('path');
+
 const dotenv = require('dotenv');
 const express = require('express');
 const cors = require('cors');
@@ -10,6 +12,7 @@ const authRoutes = require('./routes/auth');
 
 dotenv.config();
 const app = express();
+app.set('json spaces', 3);
 
 app.use(cors({
   origin: ["https://danielk111.github.io", "http://127.0.0.1:5500", "https://dnlkrm509.github.io"],
@@ -18,6 +21,8 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+app.use("/invoices", express.static(path.join(__dirname, "invoices")));
 
 
 app.use('/admin', adminRoutes);
