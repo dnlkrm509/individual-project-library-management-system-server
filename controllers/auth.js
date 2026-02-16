@@ -147,6 +147,7 @@ exports.postReset = (req, res, next) => {
         })
         .then(result => {
         res.status(200).json({ message: 'Email found, you shortly receive an email containing a reset password link.' });
+        console.log(`${req.protocol}://${req.get('host')}/reset/${token}`)
         resend.emails.send({
             to: [ email ],
             from: 'Strong Library <onboarding@resend.dev>',
@@ -173,6 +174,7 @@ exports.getNewPassword = (req, res, next) => {
         if (!user) {
             return res.status(404).json({ message: 'No account found.' });
         }
+        console.log(`{req.get('origin')}/individual-project-library-management-system-client/auth/new-password.html?token=${token}&userId=${user._id.toString()}`)
         res.redirect(`${req.get('origin')}/individual-project-library-management-system-client/auth/new-password.html?token=${token}&userId=${user._id.toString()}`);
     })
     .catch(err => {
