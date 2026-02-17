@@ -42,6 +42,9 @@ exports.getResources = (req, res, next) => {
         isAuthenticate = !!req.user;
     }
 
+    res.set("Cache-Control", "private, no-cache");
+    res.set("Vary", "Authorization");
+
     Resource.fetchAll(page, ITEMS_PER_PAGE)
     .then(resourceData => {
         res.status(200)
