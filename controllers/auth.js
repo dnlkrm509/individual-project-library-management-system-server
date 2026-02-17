@@ -206,7 +206,7 @@ exports.postNewPassword = (req, res, next) => {
         return newUser.save();
     })
     .then(result => {
-        res.status(200).json({ redirectUrl: `${req.get('origin')}/individual-project-library-management-system-client/auth/login.html` });
+        res.status(200).json({ redirectUrl: `${req.get('origin')}/individual-project-library-management-system-client/shop/resources.html` });
         resend.emails.send({
             to: [ resetUser.email ],
             from: 'Strong Library <onboarding@resend.dev>',
