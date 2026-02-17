@@ -75,6 +75,9 @@ exports.getResource = (req, res, next) => {
         isAuthenticated = !!req.user;
     }
 
+    res.set("Cache-Control", "private, no-cache");
+    res.set("Vary", "Authorization");
+
     Resource.findById(resourceId)
     .then(resource => {
         res.status(200).json({
@@ -97,6 +100,9 @@ exports.getBorrow = (req, res, next) => {
     if (req.user) {
         isAuthenticated = !!req.user;
     }
+
+    res.set("Cache-Control", "private, no-cache");
+    res.set("Vary", "Authorization");
     
     req.user.getBorrowed()
     .then(resources => {
@@ -212,6 +218,9 @@ exports.getBorrowedHistory = (req, res, next) => {
     if (req.user) {
         isAuthenticated = !!req.user;
     }
+
+    res.set("Cache-Control", "private, no-cache");
+    res.set("Vary", "Authorization");
     
     req.user.getBorrowedHistory()
     .then(returneds => {

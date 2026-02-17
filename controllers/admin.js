@@ -34,6 +34,9 @@ exports.getResources = (req, res, next) => {
     if (req.user) {
         isAuthenticated = !!req.user;
     }
+
+    res.set("Cache-Control", "private, no-cache");
+    res.set("Vary", "Authorization");
     
     Resource.findByUserId(req.user._id.toString())
     .then(resources => {
@@ -53,6 +56,9 @@ exports.getResources = (req, res, next) => {
 
 exports.getResourceById = (req, res, next) => {
   const resourceId = req.params.resourceId;
+
+  res.set("Cache-Control", "private, no-cache");
+  res.set("Vary", "Authorization");
 
   Resource.findById(resourceId)
     .then(resource => {
