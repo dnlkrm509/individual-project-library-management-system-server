@@ -15,7 +15,7 @@ const app = express();
 app.set('json spaces', 3);
 
 app.use(cors({
-  origin: ["https://danielk111.github.io", "http://127.0.0.1:5500", "https://dnlkrm509.github.io"],
+  origin: ["https://danielk111.github.io", "http://127.0.0.1:5501", "https://dnlkrm509.github.io"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
