@@ -35,6 +35,80 @@ exports.getFile = (req, res, next) => {
     })
 }
 
+exports.getSearch = async (req, res, next) => {
+    const searchText = req.query.search;
+    const page = +req.query.page || 1;
+
+    isAuthenticate = false;
+    if (req.user) {
+        isAuthenticate = !!req.user;
+    }
+
+    res.set("Cache-Control", "private, no-cache");
+    res.set("Vary", "Authorization");
+    // console.log(searchText)
+
+    if (searchText) {
+    //     // Perform search with query
+        const searchNum = Number(searchText);
+
+        const query = {
+            $or: [
+                { title: { $regex: searchText, $options: 'i' } },
+                { author: { $regex: searchText, $options: 'i' } },
+                { genre: { $regex: searchText, $options: 'i' } },
+                ...(isNaN(searchNum) ? [] : [
+                    { publicationYear: searchNum },
+                    { availableStatus: searchNum }])
+            ]
+        };
+        Resource.fetchAllWithQuery(page, ITEMS_PER_PAGE, query)
+    .then(resourceData => {
+        console.log(resourceData)
+        res.status(200)
+        .json({
+            resources: resourceData.resources,
+            loggedInUser: req.user,
+            userId: req.userId,
+            isAuthenticated: isAuthenticate,
+            previousPage: page - 1,
+            currentPage: page,
+            nextPage: page + 1,
+            lastPage: Math.ceil(resourceData.itemsCount / ITEMS_PER_PAGE),
+            hasPreviousPage: page > 1,
+            hasNextPage: (page * ITEMS_PER_PAGE) < resourceData.itemsCount
+        });
+    })
+    .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+    });
+    } else {
+        Resource.fetchAll(page, ITEMS_PER_PAGE)
+    .then(resourceData => {
+        res.status(200)
+        .json({
+            resources: resourceData.resources,
+            loggedInUser: req.user,
+            userId: req.userId,
+            isAuthenticated: isAuthenticate,
+            previousPage: page - 1,
+            currentPage: page,
+            nextPage: page + 1,
+            lastPage: Math.ceil(resourceData.itemsCount / ITEMS_PER_PAGE),
+            hasPreviousPage: page > 1,
+            hasNextPage: (page * ITEMS_PER_PAGE) < resourceData.itemsCount
+        });
+    })
+    .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+    });
+    }
+}
+
 exports.getResources = (req, res, next) => {
     const page = +req.query.page || 1;
     let isAuthenticate = false;

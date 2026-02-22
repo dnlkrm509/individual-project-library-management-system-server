@@ -70,6 +70,23 @@ class Resource {
         .catch(err => console.log(err))
     }
 
+
+    static fetchAllWithQuery(page, itemsPerPage, query) {
+        const db = getDb();
+        return Promise.all([
+            db.collection('resources').countDocuments(query),
+            db.collection('resources')
+            .find(query)
+            .skip((page - 1) * itemsPerPage)
+            .limit(itemsPerPage)
+            .toArray()
+        ])
+        .then(([ itemsCount, resources]) => {
+            return { resources, itemsCount }
+        })
+        .catch(err => console.log(err))
+    }
+
     static deleteByResourceIdANDUserId(resourceId, userId) {
         const db = getDb();
         return db

@@ -8,6 +8,7 @@ const optionalAuth = require('../middleware/optional-auth');
 
 router.get('/invoices/:filename', resourceController.getFile);
 
+router.get('/search', optionalAuth, resourceController.getSearch);
 router.get('/', optionalAuth, resourceController.getResources);
 router.get('/resources/:resourceId', optionalAuth, resourceController.getResource);
 
