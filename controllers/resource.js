@@ -11,7 +11,7 @@ const PDFDocument = require('pdfkit');
 const Resource = require('../models/resource');
 const BorrowedHistory = require('../models/borrowedHistory');
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 12;
 
 exports.getFile = (req, res, next) => {
     const filename = req.params.filename;
@@ -64,7 +64,6 @@ exports.getSearch = async (req, res, next) => {
         };
         Resource.fetchAllWithQuery(page, ITEMS_PER_PAGE, query)
     .then(resourceData => {
-        console.log(resourceData)
         res.status(200)
         .json({
             resources: resourceData.resources,
@@ -108,39 +107,6 @@ exports.getSearch = async (req, res, next) => {
     });
     }
 }
-
-exports.getResources = (req, res, next) => {
-    const page = +req.query.page || 1;
-    let isAuthenticate = false;
-    if (req.user) {
-        isAuthenticate = !!req.user;
-    }
-
-    res.set("Cache-Control", "private, no-cache");
-    res.set("Vary", "Authorization");
-
-    Resource.fetchAll(page, ITEMS_PER_PAGE)
-    .then(resourceData => {
-        res.status(200)
-        .json({
-            resources: resourceData.resources,
-            loggedInUser: req.user,
-            userId: req.userId,
-            isAuthenticated: isAuthenticate,
-            previousPage: page - 1,
-            currentPage: page,
-            nextPage: page + 1,
-            lastPage: Math.ceil(resourceData.itemsCount / ITEMS_PER_PAGE),
-            hasPreviousPage: page > 1,
-            hasNextPage: (page * ITEMS_PER_PAGE) < resourceData.itemsCount
-        });
-    })
-    .catch(err => {
-        const error = new Error(err);
-        error.httpStatusCode = 500;
-        return next(error);
-    });
-};
 
 exports.getResource = (req, res, next) => {
     const resourceId = req.params.resourceId;
