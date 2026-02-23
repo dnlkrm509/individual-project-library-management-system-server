@@ -51,14 +51,26 @@ exports.getSearch = async (req, res, next) => {
     if (searchText) {
     //     // Perform search with query
         const searchNum = Number(searchText);
+        let yearQuery = 0;
 
+        if (!isNaN(searchNum)) {
+            if (searchText.length === 4) {
+                yearQuery = { publicationYear: searchNum };
+            } else {
+                const factor = Math.pow(10, 4 - searchText.length);
+                const min = searchNum * factor;
+                const max = min + factor - 1;
+
+                yearQuery = { publicationYear: { $gte: min, $lte: max } };
+            }
+        }
         const query = {
             $or: [
                 { title: { $regex: searchText, $options: 'i' } },
                 { author: { $regex: searchText, $options: 'i' } },
                 { genre: { $regex: searchText, $options: 'i' } },
                 ...(isNaN(searchNum) ? [] : [
-                    { publicationYear: searchNum },
+                    yearQuery,
                     { availableStatus: searchNum }])
             ]
         };
