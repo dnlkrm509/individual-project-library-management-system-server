@@ -10,6 +10,7 @@ const PDFDocument = require('pdfkit');
 
 const Resource = require('../models/resource');
 const BorrowedHistory = require('../models/borrowedHistory');
+const itemsRecommendation = require('../models/itemsRecommendation');
 
 const ITEMS_PER_PAGE = 12;
 
@@ -135,6 +136,43 @@ exports.getResource = (req, res, next) => {
         res.status(200).json({
             pageTitle: resource.title,
             path: '/resources',
+            resource,
+            loggedInUser: req.user,
+            isAuthenticated
+        })
+    })
+    .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+    });
+};
+
+exports.getRecommendation = (req, res, next) => {
+    const resourceId = req.params.resourceId;
+    let isAuthenticated = false;
+    if (req.user) {
+        isAuthenticated = !!req.user;
+    }
+
+    res.set("Cache-Control", "private, no-cache");
+    res.set("Vary", "Authorization");
+
+    itemsRecommendation.findByID(resourceId)
+    .then(resourceData => {
+        const resourcePromise = resourceData.flatMap(RD => {
+            return RD.itemRecommendation.map(item => {
+                return Resource.findById(item.itemId);
+            });
+        });
+
+        return Promise.all(resourcePromise)
+    })
+    .then(resource => {
+        console.log(resource)
+        res.status(200).json({
+            pageTitle: 'Detail',
+            path: '/detail',
             resource,
             loggedInUser: req.user,
             isAuthenticated

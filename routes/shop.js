@@ -10,6 +10,7 @@ router.get('/invoices/:filename', resourceController.getFile);
 
 router.get('/search', optionalAuth, resourceController.getSearch);
 router.get('/resources/:resourceId', optionalAuth, resourceController.getResource);
+router.get('/recommendation/:resourceId', optionalAuth, resourceController.getRecommendation);
 
 router.get('/borrow', isAuth, resourceController.getBorrow);
 router.post('/borrow', isAuth, resourceController.postBorrow);
