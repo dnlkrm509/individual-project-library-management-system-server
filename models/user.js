@@ -129,13 +129,13 @@ class User {
             
             return db.collection('borrowed-history').insertOne(borrowedHistory)
             .then(result => {
-                async function updateSimilarity(resourceId, borrowedHistoryIds) {
-                    const similarityCollection = db.collection('item-similarity');
+                async function updateRecommendation(resourceId, borrowedHistoryIds) {
+                    const recommendationCollection = db.collection('items-recommendation');
 
                     for (const RID of borrowedHistoryIds) {
                         if (RID.toString() === resourceId.toString()) continue;
 
-                        const isRIDExists = await similarityCollection.findOne({ itemId: RID });
+                        const isRIDExists = await recommendationCollection.findOne({ itemId: RID });
                         if(isRIDExists) {
                             // Check if the recommendation already exists in array
                             const existingRecommendation = isRIDExists.itemRecommendation.find(
@@ -144,20 +144,20 @@ class User {
 
                             if (existingRecommendation) {
                                 // Increment score
-                                await similarityCollection.updateOne(
+                                await recommendationCollection.updateOne(
                                     { itemId: RID, "itemRecommendation.itemId": resourceId },
                                     { $inc: { "itemRecommendation.$.score": 1 } }
                                 );
                             } else {
                                 // Add new recommendation
-                                await similarityCollection.updateOne(
+                                await recommendationCollection.updateOne(
                                     { itemId: RID },
                                     { $push: { itemRecommendation: { itemId: resourceId, score: 1 } } }
                                 );
                             }
                         } else {
                             // If recommendation does not exist yet, push it
-                            await similarityCollection.insertOne({
+                            await recommendationCollection.insertOne({
                                 itemId: RID,
                                 itemRecommendation: [
                                     { itemId: resourceId, score: 1 }
@@ -165,7 +165,7 @@ class User {
                             })
                         }
 
-                        const isResourceExists = await similarityCollection.findOne({ itemId: resourceId });
+                        const isResourceExists = await recommendationCollection.findOne({ itemId: resourceId });
                         if(isResourceExists) {
                             // Check if the recommendation already exists in array
                             const existingRecommendation = isResourceExists.itemRecommendation.find(
@@ -174,20 +174,20 @@ class User {
 
                             if (existingRecommendation) {
                                 // Increment score
-                                await similarityCollection.updateOne(
+                                await recommendationCollection.updateOne(
                                     { itemId: resourceId, "itemRecommendation.itemId": RID },
                                     { $inc: { "itemRecommendation.$.score": 1 } }
                                 );
                             } else {
                                 // Add new recommendation
-                                await similarityCollection.updateOne(
+                                await recommendationCollection.updateOne(
                                     { itemId: resourceId },
                                     { $push: { itemRecommendation: { itemId: RID, score: 1 } } }
                                 );
                             }
                         } else {
                             // If recommendation does not exist yet, push it
-                            await similarityCollection.insertOne({
+                            await recommendationCollection.insertOne({
                                 itemId: resourceId,
                                 itemRecommendation: [
                                     { itemId: RID, score: 1 }
@@ -204,7 +204,7 @@ class User {
 
                     console.log(borrowedHistoryIds)
 
-                    return updateSimilarity(resourceId, borrowedHistoryIds);                    
+                    return updateRecommendation(resourceId, borrowedHistoryIds);                    
                 })
             })
         })
