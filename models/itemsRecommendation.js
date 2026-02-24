@@ -1,12 +1,13 @@
-const mongodb = require('mongodb');
-
 const getDb = require('../util/database').getDb;
 
 class ItemRecommendation {
-    static findByID (recommendationResourceId) {
+    static findByID () {
         const db = getDb();
         return db
-        .collection('items-recommendation').findOne({_id: new mongodb.ObjectId(recommendationResourceId) })
+        .collection('items-recommendation').find({})
+        .sort({ score: -1 })
+        .limit(10)
+        .toArray()
     }
 }
 

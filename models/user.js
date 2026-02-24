@@ -169,7 +169,7 @@ class User {
                         if(isResourceExists) {
                             // Check if the recommendation already exists in array
                             const existingRecommendation = isResourceExists.itemRecommendation.find(
-                                rec => rec.itemId.toString() === resourceId.toString()
+                                rec => rec.itemId.toString() === RID.toString()
                             );
 
                             if (existingRecommendation) {
