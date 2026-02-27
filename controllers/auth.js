@@ -117,7 +117,7 @@ exports.postSignup = (req, res, next) => {
         });
         return resend.emails.send({
             to: [ email ],
-            from: 'Strong Library <onboarding@resend.dev>',
+            from: 'NextGen Digital Library<onboarding@resend.dev>',
             subject: 'Welcome to our Library members',
             html: '<h1>Hello</h1><p>You successfully signed up!</p>'
         });
@@ -149,7 +149,7 @@ exports.postReset = (req, res, next) => {
         res.status(200).json({ message: 'Email found, you shortly receive an email containing a reset password link.' });
         resend.emails.send({
             to: [ email ],
-            from: 'Strong Library <onboarding@resend.dev>',
+            from: 'NextGen Digital Library<onboarding@resend.dev>',
             subject: 'Password Reset',
             html: `
                 <p>You requested password reset</p>
@@ -209,7 +209,7 @@ exports.postNewPassword = (req, res, next) => {
         res.status(200).json({ redirectUrl: `${req.get('origin')}/individual-project-library-management-system-client/shop/resources.html` });
         resend.emails.send({
             to: [ resetUser.email ],
-            from: 'Strong Library <onboarding@resend.dev>',
+            from: 'NextGen Digital Library<onboarding@resend.dev>',
             subject: 'Password Reset',
             html: `
                 <p>Your password changed.</p>
