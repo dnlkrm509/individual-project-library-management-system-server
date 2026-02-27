@@ -3,9 +3,10 @@ const mongodb = require('mongodb');
 const getDb = require('../util/database').getDb;
 
 class User {
-    constructor(email, password,borrowedItems, userId, resetToken, resetTokenExpiration) {
+    constructor(email, password, role, borrowedItems, userId, resetToken, resetTokenExpiration) {
         this.email = email;
         this.password = password;
+        this.role = role;
         this.borrowedItems = borrowedItems ? borrowedItems : { resources: [] }; // { resources: [] }
         this._id = userId ? new mongodb.ObjectId(userId) : null;
         this.resetToken = resetToken;

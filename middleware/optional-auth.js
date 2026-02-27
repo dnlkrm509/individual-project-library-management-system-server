@@ -24,7 +24,7 @@ module.exports = async (req, res, next) => {
     if (!myUser) {
       return next();
     }
-    req.user = new User(myUser.email, myUser.password, myUser.borrowedItems, myUser._id);
+    req.user = new User(myUser.email, myUser.password, myUser.role, myUser.borrowedItems, myUser._id);
     next();
   } catch (err) {
     console.error(err);

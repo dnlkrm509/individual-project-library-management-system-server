@@ -107,7 +107,7 @@ exports.postSignup = (req, res, next) => {
     bcrypt
     .hash(password, 12)
     .then(hashedPassword => {
-        const user = new User(email, hashedPassword, { resources: [] });
+        const user = new User(email, hashedPassword, "user", { resources: [] });
 
         return user.save();
     })
@@ -142,7 +142,7 @@ exports.postReset = (req, res, next) => {
                 return res.status(404).json({ message: 'No account with that email found.' });
             }
         
-            const newUser = new User(user.email, user.password, user.borrowedItems, user._id.toString(), token, Date.now() + 3600000);
+            const newUser = new User(user.email, user.password, user.role, user.borrowedItems, user._id.toString(), token, Date.now() + 3600000);
             return newUser.save()
         })
         .then(result => {
@@ -200,7 +200,7 @@ exports.postNewPassword = (req, res, next) => {
     })
     .then(hashedPassword => {
         const newUser = new User(
-            resetUser.email, hashedPassword, resetUser.borrowedItems,
+            resetUser.email, hashedPassword, resetUser.role, resetUser.borrowedItems,
             resetUser._id.toString(), undefined, undefined
         )
         return newUser.save();
