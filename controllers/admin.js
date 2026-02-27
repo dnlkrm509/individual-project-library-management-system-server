@@ -44,6 +44,7 @@ exports.getResources = (req, res, next) => {
             pageTitle: 'Admin Resources',
             path: '/admin/resources',
             resources: resources,
+            loggedInUser: req.user,
             isAuthenticated
         })
     })

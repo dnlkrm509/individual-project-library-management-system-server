@@ -200,6 +200,7 @@ exports.getBorrow = (req, res, next) => {
             pageTitle: 'Your Borrowed Resources',
             path: '/borrow',
             resources,
+            loggedInUser: req.user,
             isAuthenticated
         })
     })
@@ -318,6 +319,7 @@ exports.getBorrowedHistory = (req, res, next) => {
             pageTitle: 'Your Borrowed Resources History',
             path: '/borrow-history',
             returneds,
+            loggedInUser: req.user,
             isAuthenticated
         })
     })
