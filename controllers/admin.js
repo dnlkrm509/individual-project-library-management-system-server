@@ -55,6 +55,10 @@ exports.getResources = (req, res, next) => {
     });
 };
 
+exports.getUser = (req, res, next) => {
+    return res.status(200).json({ loggedInUser: req.user });
+}
+
 exports.getResourceById = (req, res, next) => {
   const resourceId = req.params.resourceId;
 

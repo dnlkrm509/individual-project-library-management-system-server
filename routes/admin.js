@@ -34,6 +34,7 @@ router.get('/resources', isAuth, adminController.getResources);
 router.delete('/resource/:resourceId', isAuth, adminController.deleteResource);
 
 router.get('/resource/:resourceId', isAuth, adminController.getResourceById);
+router.get('/user', isAuth, adminController.getUser);
 
 router.put('/edit-resource/:resourceId', 
     [
