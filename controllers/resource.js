@@ -165,10 +165,8 @@ exports.getRecommendation = (req, res, next) => {
 
     itemsRecommendation.findByID(resourceId)
     .then(resourceData => {
-        const resourcePromise = resourceData.flatMap(RD => {
-            return RD.itemRecommendation.map(item => {
-                return Resource.findById(item.itemId);
-            });
+        const resourcePromise = resourceData.map(item => {
+            return Resource.findById(item.itemId);
         });
 
         return Promise.all(resourcePromise)
