@@ -14,6 +14,7 @@ router.get('/recommendation/:resourceId', optionalAuth, resourceController.getRe
 
 router.get('/borrow', isAuth, resourceController.getBorrow);
 router.post('/borrow', isAuth, resourceController.postBorrow);
+router.post('/sentiment/:resourceId', isAuth, resourceController.postSentiment);
 router.get('/checkout', isAuth, resourceController.getCheckout);
 router.get('/checkout/success', isAuth, resourceController.getCheckoutSuccess);
 

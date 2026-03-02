@@ -1,13 +1,18 @@
 const fs = require('fs');
 const path = require('path');
 
+const { InferenceClient } = require("@huggingface/inference");
+const mongodb = require('mongodb');
 const dotenv = require('dotenv');
 dotenv.config();
 
+
+const client = new InferenceClient(process.env.HF_API_KEY);
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const PDFDocument = require('pdfkit');
 
 
+const getDb = require('../util/database').getDb;
 const Resource = require('../models/resource');
 const BorrowedHistory = require('../models/borrowedHistory');
 const itemsRecommendation = require('../models/itemsRecommendation');
@@ -226,6 +231,53 @@ exports.postBorrow = (req, res, next) => {
         error.httpStatusCode = 500;
         return next(error);
     });
+};
+
+exports.postSentiment = async (req, res, next) => {
+    const resourceId = req.params.resourceId;
+
+    try {
+    const text = req.body.text;
+
+    const result = await client.textClassification({
+        model: "cardiffnlp/twitter-roberta-base-sentiment-latest",
+        inputs: text,
+    });
+
+    const label = result[0].label;
+    const score = result[0].score;
+
+    const isPositive = label === 'negative' ? -1 : 1;
+    const sentimentValue = score * isPositive;
+
+    const response = {
+      input: text,
+      sentiment: {
+        label,
+        score
+      }
+    };
+    
+    const db = getDb();
+    const itemId = new mongodb.ObjectId(resourceId);
+
+    const item = await db.collection('items-recommendation')
+            .findOne({ itemId });
+
+    const previousConfidence = item?.confidence || 0;
+
+    const newConfidence = (previousConfidence + sentimentValue) / 2;
+
+    await db.collection('items-recommendation')
+    .updateOne(
+        { itemId },
+        { $set: { confidence: newConfidence } }
+    );
+    return res.json({ ...response, newConfidence });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 exports.getCheckout = (req, res, next) => {
