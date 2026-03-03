@@ -60,17 +60,22 @@ class Resource {
             db.collection('resources').countDocuments(),
             db.collection('resources')
             .aggregate([
-    {
-      $lookup: {
-        from: "items-recommendation",
-        localField: "_id",
-        foreignField: "resourceId",
-        as: "recommendation"
-      }
-    },
-    { $unwind: "$recommendation" },
-    { $sort: { "recommendation.confidence": -1 } }
-  ])
+                {
+                    $lookup: {
+                        from: "items-recommendation",
+                        localField: "_id",
+                        foreignField: "itemId",
+                        as: "recommendation"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$recommendation",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                { $sort: { "recommendation.confidence": -1 } }
+            ])
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage)
             .toArray()
@@ -87,7 +92,24 @@ class Resource {
         return Promise.all([
             db.collection('resources').countDocuments(query),
             db.collection('resources')
-            .find(query)
+            .aggregate([
+                { $match: query },
+                {
+                    $lookup: {
+                        from: "items-recommendation",
+                        localField: "_id",
+                        foreignField: "itemId",
+                        as: "recommendation"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$recommendation",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                { $sort: { "recommendation.confidence": -1 } }
+            ])
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage)
             .toArray()
