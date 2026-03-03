@@ -59,7 +59,18 @@ class Resource {
         return Promise.all([
             db.collection('resources').countDocuments(),
             db.collection('resources')
-            .find()
+            .aggregate([
+    {
+      $lookup: {
+        from: "items-recommendation",
+        localField: "_id",
+        foreignField: "resourceId",
+        as: "recommendation"
+      }
+    },
+    { $unwind: "$recommendation" },
+    { $sort: { "recommendation.confidence": -1 } }
+  ])
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage)
             .toArray()
