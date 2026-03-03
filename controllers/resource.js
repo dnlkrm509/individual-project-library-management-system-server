@@ -16,6 +16,7 @@ const getDb = require('../util/database').getDb;
 const Resource = require('../models/resource');
 const BorrowedHistory = require('../models/borrowedHistory');
 const itemsRecommendation = require('../models/itemsRecommendation');
+const Reviews = require('../models/reviews');
 
 const ITEMS_PER_PAGE = 12;
 
@@ -126,7 +127,7 @@ exports.getSearch = async (req, res, next) => {
     }
 }
 
-exports.getResource = (req, res, next) => {
+exports.getResource = async (req, res, next) => {
     const resourceId = req.params.resourceId;
     let isAuthenticated = false;
     if (req.user) {
@@ -136,21 +137,22 @@ exports.getResource = (req, res, next) => {
     res.set("Cache-Control", "private, no-cache");
     res.set("Vary", "Authorization");
 
-    Resource.findById(resourceId)
-    .then(resource => {
+    try {
+        const resource = await Resource.findById(resourceId)
+        const reviews = await Reviews.findByID(resourceId);
         res.status(200).json({
             pageTitle: resource.title,
             path: '/resources',
             resource,
+            reviews,
             loggedInUser: req.user,
             isAuthenticated
         })
-    })
-    .catch(err => {
-        const error = new Error(err);
+    } catch (error) {
+        const err = new Error(error);
         error.httpStatusCode = 500;
-        return next(error);
-    });
+        return next(err);
+    }
 };
 
 exports.getRecommendation = (req, res, next) => {
@@ -233,6 +235,7 @@ exports.postBorrow = (req, res, next) => {
 
 exports.postSentiment = async (req, res, next) => {
     const resourceId = req.params.resourceId;
+    const rating = req.body.rating;
 
     try {
     const text = req.body.text;
@@ -250,6 +253,7 @@ exports.postSentiment = async (req, res, next) => {
 
     const response = {
       input: text,
+      rating,
       sentiment: {
         label,
         score
@@ -271,6 +275,12 @@ exports.postSentiment = async (req, res, next) => {
         { itemId },
         { $set: { confidence: newConfidence } }
     );
+
+    await db.collection('reviews').insertOne({
+        itemId,
+        response
+    });
+
     return res.json({ ...response, newConfidence });
 
   } catch (error) {
