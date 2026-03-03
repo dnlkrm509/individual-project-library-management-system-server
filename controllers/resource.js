@@ -305,9 +305,8 @@ exports.getCheckout = (req, res, next) => {
             const msPerDay = 1000 * 60 * 60 * 24;
             const lateDays = Math.ceil((returned - due) / msPerDay);
 
-            total = lateDays > 0 ? (lateDays * 1.99) : 0;
+            if (lateDays > 0) { total = (lateDays * 1.99) };
         })
-
         return stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: resources.map(resource => {
