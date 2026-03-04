@@ -256,7 +256,8 @@ exports.postSentiment = async (req, res, next) => {
       rating,
       sentiment: {
         label,
-        score
+        score,
+        confidence: sentimentValue
       }
     };
     
