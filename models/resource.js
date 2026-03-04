@@ -62,25 +62,35 @@ class Resource {
             .aggregate([
                 {
                     $lookup: {
-                        from: "items-recommendation",
+                        from: "reviews",
                         localField: "_id",
                         foreignField: "itemId",
-                        as: "recommendation"
+                        as: "reviews"
                     }
                 },
                 {
                     $unwind: {
-                        path: "$recommendation",
+                        path: "$reviews",
                         preserveNullAndEmptyArrays: true
                     }
                 },
-                { $sort: { "recommendation.confidence": -1 } }
+                {
+                    $addFields: {
+                        numericRating: { $toInt: "$reviews.response.rating" }
+                    }
+                },
+                {
+                    $sort: {
+                        numericRating: -1,
+                        "reviews.response.sentiment.score": -1
+                    }
+                }
             ])
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage)
             .toArray()
         ])
-        .then(([ itemsCount, resources]) => {
+        .then(([itemsCount, resources]) => {
             return { resources, itemsCount }
         })
         .catch(err => console.log(err))
@@ -96,19 +106,29 @@ class Resource {
                 { $match: query },
                 {
                     $lookup: {
-                        from: "items-recommendation",
+                        from: "reviews",
                         localField: "_id",
                         foreignField: "itemId",
-                        as: "recommendation"
+                        as: "reviews"
                     }
                 },
                 {
                     $unwind: {
-                        path: "$recommendation",
+                        path: "$reviews",
                         preserveNullAndEmptyArrays: true
                     }
                 },
-                { $sort: { "recommendation.confidence": -1 } }
+                {
+                    $addFields: {
+                        numericRating: { $toInt: "$reviews.response.rating" }
+                    }
+                },
+                {
+                    $sort: {
+                        numericRating: -1,
+                        "reviews.response.sentiment.score": -1
+                    }
+                }
             ])
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage)
