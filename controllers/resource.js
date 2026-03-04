@@ -292,49 +292,55 @@ exports.getCheckout = (req, res, next) => {
     const resourceId = req.query.resourceId;
     const returned = req.query.returned;
 
-    let myResources;
+    let selectedResource;
     let total = 0;
     
     req.user.getBorrowed()
     .then(resources => {
-        myResources = resources;
-        resources.forEach(resource => {
-            const returned = new Date();
-            const due = new Date(resource.dueDate);
+        selectedResource = resources.find(
+            resource => resource._id.toString() === resourceId.toString()
+        );
+        console.log(selectedResource)
+        if (!selectedResource) {
+            throw new Error('Resource not found');
+        }
 
-            const msPerDay = 1000 * 60 * 60 * 24;
-            const lateDays = Math.ceil((returned - due) / msPerDay);
+        const returnedDate = new Date();
+        const due = new Date(selectedResource.dueDate);
 
-            if (lateDays > 0) { total = (lateDays * 1.99) };
-        })
+        const msPerDay = 1000 * 60 * 60 * 24;
+        const lateDays = Math.ceil((returnedDate - due) / msPerDay);
+
+        if (lateDays > 0) {
+            total = lateDays * 1.99;
+        }
+
         return stripe.checkout.sessions.create({
             payment_method_types: ['card'],
-            line_items: resources.map(resource => {
-                return {
-                    price_data: {
-                        currency: 'gbp',
-                        product_data: {
-                            name: resource.title,
-                            description: resource.author + ", " + resource.publicationYear
-                        },
-                        unit_amount: total * 100
+            line_items: [{
+                price_data: {
+                    currency: 'gbp',
+                    product_data: {
+                        name: selectedResource.title,
+                        description: selectedResource.author + ", " + selectedResource.publicationYear
                     },
-                    quantity: 1
-                }
-            }),
+                    unit_amount: Math.round(total * 100)
+                },
+                quantity: 1
+            }],
             mode: 'payment',
-            success_url: `${req.get('origin')}/individual-project-library-management-system-client/shop/checkout-success.html?resourceId=` + resourceId + '&returned=' + returned,
+            success_url: `${req.get('origin')}/individual-project-library-management-system-client/shop/checkout-success.html?resourceId=${resourceId}&returned=${returned}`,
             cancel_url: `${req.get('origin')}/individual-project-library-management-system-client/shop/borrow.html`
-        })
+        });
     })
     .then(session => {
         res.json({
             pageTitle: 'Checkout',
             path: '/checkout',
-            resources: myResources,
+            resource: selectedResource,
             total,
             sessionId: session.id
-        })
+        });
     })
     .catch(err => {
         const error = new Error(err);
