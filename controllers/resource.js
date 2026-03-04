@@ -243,6 +243,7 @@ exports.postSentiment = async (req, res, next) => {
         rating
     };
     
+    const db = getDb();
     const itemId = new mongodb.ObjectId(resourceId);
     
     try {
@@ -265,8 +266,6 @@ exports.postSentiment = async (req, res, next) => {
         confidence: sentimentValue
       }
     };
-    
-    const db = getDb();
 
     const item = await db.collection('items-recommendation')
             .findOne({ itemId });
