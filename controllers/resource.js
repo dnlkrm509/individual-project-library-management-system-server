@@ -243,6 +243,8 @@ exports.postSentiment = async (req, res, next) => {
         rating
     };
     
+    const itemId = new mongodb.ObjectId(resourceId);
+    
     try {
     const result = await client.textClassification({
         model: "cardiffnlp/twitter-roberta-base-sentiment-latest",
@@ -265,7 +267,6 @@ exports.postSentiment = async (req, res, next) => {
     };
     
     const db = getDb();
-    const itemId = new mongodb.ObjectId(resourceId);
 
     const item = await db.collection('items-recommendation')
             .findOne({ itemId });
