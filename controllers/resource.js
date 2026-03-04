@@ -245,6 +245,7 @@ exports.postSentiment = async (req, res, next) => {
     
     const db = getDb();
     const itemId = new mongodb.ObjectId(resourceId);
+    console.log(response)
     
     try {
         const result = await client.textClassification({
