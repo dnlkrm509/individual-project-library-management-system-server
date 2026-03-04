@@ -247,53 +247,54 @@ exports.postSentiment = async (req, res, next) => {
     const itemId = new mongodb.ObjectId(resourceId);
     
     try {
-    const result = await client.textClassification({
-        model: "cardiffnlp/twitter-roberta-base-sentiment-latest",
-        inputs: text,
-    });
+        const result = await client.textClassification({
+            model: "cardiffnlp/twitter-roberta-base-sentiment-latest",
+            inputs: text,
+        });
 
-    const label = result[0].label;
-    const score = result[0].score;
+        const label = result[0].label;
+        const score = result[0].score;
 
-    const isPositive = label === 'negative' ? -1 : 1;
-    const sentimentValue = score * isPositive;
+        const isPositive = label === 'negative' ? -1 : 1;
+        const sentimentValue = score * isPositive;
 
-    response = {
-      ...response,
-      sentiment: {
-        label,
-        score,
-        confidence: sentimentValue
-      }
-    };
+        response = {
+            ...response,
+            sentiment: {
+                label,
+                score,
+                confidence: sentimentValue
+            }
+        };
 
-    const item = await db.collection('items-recommendation')
-            .findOne({ itemId });
+        const item = await db.collection('items-recommendation')
+                .findOne({ itemId });
 
-    const previousConfidence = item?.confidence || 0;
+        const previousConfidence = item?.confidence || 0;
 
-    const newConfidence = (previousConfidence + sentimentValue) / 2;
+        const newConfidence = (previousConfidence + sentimentValue) / 2;
 
-    await db.collection('items-recommendation')
-    .updateOne(
-        { itemId },
-        { $set: { confidence: newConfidence } }
-    );
+        await db.collection('items-recommendation')
+        .updateOne(
+            { itemId },
+            { $set: { confidence: newConfidence } }
+        );
+    } catch (error) {
+        return res.status(500).json({ message: "HuggingFace failed:" + err.message });
+    }
 
-    await db.collection('reviews').insertOne({
-        itemId,
-        response
-    });
+    try {
+        await db.collection('reviews').insertOne({
+            itemId,
+            response,
+            createdAt: new Date()
+        });
 
-    return res.json({ ...response, newConfidence });
+        return res.json({ message: "Review saved", ...response, newConfidence });
 
-  } catch (error) {
-    await db.collection('reviews').insertOne({
-      itemId,
-      response
-   });
-    return res.status(500).json({ ...response, error: error.message });
-  }
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
 };
 
 exports.getCheckout = (req, res, next) => {
