@@ -288,7 +288,11 @@ exports.postSentiment = async (req, res, next) => {
     return res.json({ ...response, newConfidence });
 
   } catch (error) {
-    res.status(500).json({ ...response, error: error.message });
+    await db.collection('reviews').insertOne({
+      itemId,
+      response
+   });
+    return res.status(500).json({ ...response, error: error.message });
   }
 };
 
