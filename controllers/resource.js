@@ -236,10 +236,14 @@ exports.postBorrow = (req, res, next) => {
 exports.postSentiment = async (req, res, next) => {
     const resourceId = req.params.resourceId;
     const rating = req.body.rating;
-
-    try {
     const text = req.body.text;
-
+    
+    let response = {
+        input: text,
+        rating
+    };
+    
+    try {
     const result = await client.textClassification({
         model: "cardiffnlp/twitter-roberta-base-sentiment-latest",
         inputs: text,
@@ -251,9 +255,8 @@ exports.postSentiment = async (req, res, next) => {
     const isPositive = label === 'negative' ? -1 : 1;
     const sentimentValue = score * isPositive;
 
-    const response = {
-      input: text,
-      rating,
+    response = {
+      ...response,
       sentiment: {
         label,
         score,
@@ -285,7 +288,7 @@ exports.postSentiment = async (req, res, next) => {
     return res.json({ ...response, newConfidence });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ ...response, error: error.message });
   }
 };
 
