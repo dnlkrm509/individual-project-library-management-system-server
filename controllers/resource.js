@@ -287,7 +287,8 @@ exports.postSentiment = async (req, res, next) => {
                     confidenceSum: newSum,
                     reviewCount: newCount
                 }
-            }
+            },
+            { upsert: true }
         );
     } catch (error) {
         console.log("HuggingFace failed:", error.message);
