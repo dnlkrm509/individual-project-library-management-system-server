@@ -283,7 +283,7 @@ exports.postSentiment = async (req, res, next) => {
         const newSum = previousSum + sentimentValue;
         const newCount = previousCount + 1;
 
-        const newConfidence = newSum / newCount;
+        newConfidence = newSum / newCount;
 
         await db.collection("items-recommendation").updateOne(
             { itemId },
