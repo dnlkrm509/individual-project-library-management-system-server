@@ -245,6 +245,7 @@ exports.postSentiment = async (req, res, next) => {
     
     const db = getDb();
     const itemId = new mongodb.ObjectId(resourceId);
+    let newConfidence = null;
     console.log(response)
     
     try {
@@ -268,20 +269,29 @@ exports.postSentiment = async (req, res, next) => {
             }
         };
 
-        const item = await db.collection('items-recommendation')
-                .findOne({ itemId });
+        const item = await db.collection("items-recommendation").findOne({ itemId });
 
-        const previousConfidence = item?.confidence || 0;
+        const previousSum = item?.confidenceSum || 0;
+        const previousCount = item?.reviewCount || 0;
 
-        const newConfidence = (previousConfidence + sentimentValue) / 2;
+        const newSum = previousSum + sentimentValue;
+        const newCount = previousCount + 1;
 
-        await db.collection('items-recommendation')
-        .updateOne(
+        const newConfidence = newSum / newCount;
+
+        await db.collection("items-recommendation").updateOne(
             { itemId },
-            { $set: { confidence: newConfidence } }
+            {
+                $set: {
+                    confidence: newConfidence,
+                    confidenceSum: newSum,
+                    reviewCount: newCount
+                }
+            },
+            { upsert: true }
         );
     } catch (error) {
-        return res.status(500).json({ message: "HuggingFace failed:" + err.message });
+        console.log("HuggingFace failed:", error.message);
     }
 
     try {
