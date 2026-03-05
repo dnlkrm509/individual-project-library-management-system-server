@@ -139,7 +139,7 @@ class User {
                         const isRIDExists = await recommendationCollection.findOne({ itemId: RID });
                         if(isRIDExists) {
                             // Check if the recommendation already exists in array
-                            const existingRecommendation = isRIDExists.itemRecommendation.find(
+                            const existingRecommendation = isRIDExists.itemRecommendation?.find(
                                 rec => rec.itemId.toString() === resourceId.toString()
                             );
 
@@ -169,7 +169,7 @@ class User {
                         const isResourceExists = await recommendationCollection.findOne({ itemId: resourceId });
                         if(isResourceExists) {
                             // Check if the recommendation already exists in array
-                            const existingRecommendation = isResourceExists.itemRecommendation.find(
+                            const existingRecommendation = isResourceExists.itemRecommendation?.find(
                                 rec => rec.itemId.toString() === RID.toString()
                             );
 
