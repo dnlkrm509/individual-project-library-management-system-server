@@ -7,7 +7,10 @@ class Reviews {
         const db = getDb();
         return db
         .collection('reviews')
-        .find({ itemId: new mongodb.ObjectId(resourceId) })
+        .find({
+            itemId: new mongodb.ObjectId(resourceId),
+            "response.input": { $exists: true, $ne: "" }
+        })
         .limit(10)
         .toArray()
     }
