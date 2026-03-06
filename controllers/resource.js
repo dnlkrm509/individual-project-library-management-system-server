@@ -257,8 +257,14 @@ exports.postSentiment = async (req, res, next) => {
         const label = result[0].label;
         const score = result[0].score;
 
-        const isPositive = label === 'negative' ? -1 : 1;
-        const sentimentValue = score * isPositive;
+        let multiplier = 0;
+        if (label === 'negative') {
+            multiplier = -1;
+        } else if (label === 'positive') {
+            multiplier = 1;
+        }
+        
+        const sentimentValue = score * multiplier;
 
         response = {
             ...response,
@@ -277,7 +283,7 @@ exports.postSentiment = async (req, res, next) => {
         const newSum = previousSum + sentimentValue;
         const newCount = previousCount + 1;
 
-        const newConfidence = newSum / newCount;
+        newConfidence = newSum / newCount;
 
         await db.collection("items-recommendation").updateOne(
             { itemId },
