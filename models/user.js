@@ -215,11 +215,13 @@ class User {
     getBorrowedHistory() {
         const db = getDb();
         return db
-        .collection('borrowed-history').aggregate([
-            { $match: { 'user._id': new ObjectId(this._id) } },
+        .collection('borrowed-history')
+        .aggregate([
+            { $match: { 'user._id': this._id } },
             { $unwind: '$resources' },
             { $sort: { 'resources.returnedDate': -1 } }
-        ]);
+        ])
+        .toArray();
     }
 
     static findById(userId) {
