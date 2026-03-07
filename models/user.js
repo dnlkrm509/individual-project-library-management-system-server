@@ -215,7 +215,10 @@ class User {
     getBorrowedHistory() {
         const db = getDb();
         return db
-        .collection('borrowed-history').find({ 'user._id': new mongodb.ObjectId(this._id) }).toArray();
+        .collection('borrowed-history')
+        .find({ 'user._id': new mongodb.ObjectId(this._id) })
+        .sort({ 'resources.returnedDate': -1 })
+        .toArray();
     }
 
     static findById(userId) {
