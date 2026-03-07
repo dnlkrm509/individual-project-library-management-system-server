@@ -89,7 +89,16 @@ class Resource {
                         numericRating: -1,
                         "reviews.response.sentiment.confidence": -1
                     }
-                }
+                },
+                {
+  $group: {
+    _id: "$_id",
+    resource: { $first: "$$ROOT" }
+  }
+},
+{
+  $replaceRoot: { newRoot: "$resource" }
+}
             ])
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage)
@@ -124,6 +133,11 @@ class Resource {
                     }
                 },
                 {
+                    $match: {
+                        "reviews.response.input": { $ne: "" }
+                    }
+                },
+                {
                     $addFields: {
                         numericRating: { $toInt: "$reviews.response.rating" }
                     }
@@ -133,7 +147,16 @@ class Resource {
                         numericRating: -1,
                         "reviews.response.sentiment.confidence": -1
                     }
-                }
+                },
+                {
+  $group: {
+    _id: "$_id",
+    resource: { $first: "$$ROOT" }
+  }
+},
+{
+  $replaceRoot: { newRoot: "$resource" }
+}
             ])
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage)
