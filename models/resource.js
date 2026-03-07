@@ -75,6 +75,11 @@ class Resource {
                     }
                 },
                 {
+                    $match: {
+                        "reviews.response.input": { $ne: "" }
+                    }
+                },
+                {
                     $addFields: {
                         numericRating: { $toInt: "$reviews.response.rating" }
                     }
