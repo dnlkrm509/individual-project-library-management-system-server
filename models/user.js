@@ -36,19 +36,20 @@ class User {
         });
         let availableStatus = resource.availableStatus;
         let updatedBorrowedResources = [ ...this.borrowedItems.resources ];
+        const db = getDb();
         
         if (borrowedResourceIntex >= 0) {
             // Return the existing resource
-
+            
             availableStatus = !availableStatus;
             updatedBorrowedResources = updatedBorrowedResources.filter(UBR => {
                 return UBR.resourceId.toString() !== resource._id.toString();
             })
-
+            
             this.#borrowedHistory(resource._id);
         } else {
             // Borrow as a new borrowed resource
-
+            
             availableStatus = !availableStatus;
             const currentDate = new Date();
             const futureDate = new Date();
@@ -57,19 +58,30 @@ class User {
             updatedBorrowedResources.push({
                 resourceId: new mongodb.ObjectId(resource._id), dueDate: futureDate
             });
+            db
+            .collection('reports')
+            .insertOne({
+                userId: this._id,
+                email: this.email,
+                resourceId: new mongodb.ObjectId(resource._id),
+                resourceTitle: resource.title,
+                borrowDate: currentDate,
+                dueDate: futureDate,
+                returned: false
+            })
         }
 
         const updatedBorrowed = {
             resources: updatedBorrowedResources
         };
 
-        const db = getDb();
         db
         .collection('resources')
         .updateOne(
             { _id: resource._id },
             { $set: { availableStatus: availableStatus } }
         )
+
         return db
         .collection('users')
         .updateOne(
@@ -128,7 +140,18 @@ class User {
                 }
             };
             
-            return db.collection('borrowed-history').insertOne(borrowedHistory)
+            db.collection('borrowed-history').insertOne(borrowedHistory)
+            return db
+            .collection('reports')
+            .updateOne(
+                { resourceId: new mongodb.ObjectId(resourceId), userId: this._id },
+                {
+                    $set: {
+                        returned: true,
+                        returnedDate: new Date()
+                    }
+                }
+            )
             .then(result => {
                 async function updateRecommendation(resourceId, borrowedHistoryIds) {
                     const recommendationCollection = db.collection('items-recommendation');

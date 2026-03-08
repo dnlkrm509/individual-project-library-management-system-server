@@ -30,6 +30,7 @@ router.post('/add-resource',
 );
 
 router.get('/resources', isAuth, adminController.getResources);
+router.get('/report', isAuth, adminController.getReport);
 
 router.delete('/resource/:resourceId', isAuth, adminController.deleteResource);
 

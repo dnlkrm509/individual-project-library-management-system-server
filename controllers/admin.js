@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 
 const Resource = require('../models/resource');
+const Report = require('../models/report');
 
 exports.postAddResource = (req, res, next) => {
     const title = req.body.title;
@@ -44,6 +45,34 @@ exports.getResources = (req, res, next) => {
             pageTitle: 'Admin Resources',
             path: '/admin/resources',
             resources: resources,
+            loggedInUser: req.user,
+            isAuthenticated
+        })
+    })
+    .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+    });
+};
+
+exports.getReport = (req, res, next) => {
+    const reports = req.query.reports;
+
+    let isAuthenticated = false;
+    if (req.user) {
+        isAuthenticated = !!req.user;
+    }
+
+    res.set("Cache-Control", "private, no-cache");
+    res.set("Vary", "Authorization");
+    
+    Report.fetch(reports)
+    .then(reports => {
+        res.json({
+            pageTitle: 'Admin Resources',
+            path: '/admin/resources',
+            reports,
             loggedInUser: req.user,
             isAuthenticated
         })
