@@ -75,30 +75,48 @@ class Resource {
                     }
                 },
                 {
-                    $match: {
-                        "reviews.response.input": { $ne: "" }
-                    }
-                },
-                {
                     $addFields: {
-                        numericRating: { $toInt: "$reviews.response.rating" }
+                        hasReviewText: {
+                            $cond: [
+                                { $and: [
+                                    { $ne: ["$reviews.response.input", ""] },
+                                    { $ne: ["$reviews.response.input", null] }
+                                ]},
+                                1,
+                                0
+                            ]
+                        },
+                        numericRating: {
+                            $toInt: { $ifNull: ["$reviews.response.rating", "-1"] }
+                        },
+                        confidence: {
+                            $ifNull: ["$reviews.response.sentiment.confidence", -1]
+                        }
                     }
                 },
                 {
                     $sort: {
+                        hasReviewText: -1,
                         numericRating: -1,
-                        "reviews.response.sentiment.confidence": -1
+                        confidence: -1
                     }
                 },
                 {
-  $group: {
-    _id: "$_id",
-    resource: { $first: "$$ROOT" }
-  }
-},
-{
-  $replaceRoot: { newRoot: "$resource" }
-}
+                    $group: {
+                        _id: "$_id",
+                        resource: { $first: "$$ROOT" }
+                    }
+                },
+                {
+                    $replaceRoot: { newRoot: "$resource" }
+                },
+                {
+                    $sort: {
+                        hasReviewText: -1,
+                        numericRating: -1,
+                        confidence: -1
+                    }
+                }
             ])
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage)
@@ -117,7 +135,6 @@ class Resource {
             db.collection('resources').countDocuments(query),
             db.collection('resources')
             .aggregate([
-                { $match: query },
                 {
                     $lookup: {
                         from: "reviews",
@@ -133,30 +150,48 @@ class Resource {
                     }
                 },
                 {
-                    $match: {
-                        "reviews.response.input": { $ne: "" }
-                    }
-                },
-                {
                     $addFields: {
-                        numericRating: { $toInt: "$reviews.response.rating" }
+                        hasReviewText: {
+                            $cond: [
+                                { $and: [
+                                    { $ne: ["$reviews.response.input", ""] },
+                                    { $ne: ["$reviews.response.input", null] }
+                                ]},
+                                1,
+                                0
+                            ]
+                        },
+                        numericRating: {
+                            $toInt: { $ifNull: ["$reviews.response.rating", "-1"] }
+                        },
+                        confidence: {
+                            $ifNull: ["$reviews.response.sentiment.confidence", -1]
+                        }
                     }
                 },
                 {
                     $sort: {
+                        hasReviewText: -1,
                         numericRating: -1,
-                        "reviews.response.sentiment.confidence": -1
+                        confidence: -1
                     }
                 },
                 {
-  $group: {
-    _id: "$_id",
-    resource: { $first: "$$ROOT" }
-  }
-},
-{
-  $replaceRoot: { newRoot: "$resource" }
-}
+                    $group: {
+                        _id: "$_id",
+                        resource: { $first: "$$ROOT" }
+                    }
+                },
+                {
+                    $replaceRoot: { newRoot: "$resource" }
+                },
+                {
+                    $sort: {
+                        hasReviewText: -1,
+                        numericRating: -1,
+                        confidence: -1
+                    }
+                }
             ])
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage)
