@@ -124,6 +124,7 @@ class Resource {
             .toArray()
         ])
         .then(([itemsCount, resources]) => {
+            console.log(resources)
             return { resources, itemsCount }
         })
         .catch(err => console.log(err))
