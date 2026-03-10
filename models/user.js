@@ -100,7 +100,58 @@ class User {
         
         return db
         .collection('resources')
-        .find({ _id: { $in: borrowedResourceIds } })
+        .aggregate([
+            {
+                $match: { _id: { $in: borrowedResourceIds } }
+            },
+            {
+                $lookup: {
+                    from: "reviews",
+                    localField: "_id",
+                    foreignField: "itemId",
+                    as: "reviews"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$reviews",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $addFields: {
+                    numericRating: {
+                        $toInt: { $ifNull: ["$reviews.response.rating", "-1"] }
+                    },
+                    confidence: {
+                        $ifNull: ["$reviews.response.sentiment.confidence", -1]
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    resource: { $first: "$$ROOT" },
+                    maxRating: { $max: "$numericRating" },
+                    maxConfidence: { $max: "$confidence" }
+                }
+            },
+            {
+                $addFields: {
+                    "resource.numericRating": "$maxRating",
+                    "resource.confidence": "$maxConfidence"
+                }
+            },
+            {
+                $replaceRoot: { newRoot: "$resource" }
+            },
+            {
+                $sort: {
+                    numericRating: -1,
+                    confidence: -1
+                }
+            }
+        ])
         .toArray()
         .then(resources => {
             return resources.map(resource => {
