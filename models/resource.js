@@ -98,7 +98,7 @@ class Resource {
                     $sort: {
                         
                         numericRating: -1,
-                        confidence: -1
+                        "$reviews.response.sentiment.confidence": -1
                     }
                 },
                 {
@@ -114,7 +114,7 @@ class Resource {
                     $sort: {
                         
                         numericRating: -1,
-                        confidence: -1
+                        "$reviews.response.sentiment.confidence": -1
                     }
                 }
             ])
