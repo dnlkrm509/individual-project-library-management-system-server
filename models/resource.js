@@ -87,7 +87,7 @@ class Resource {
                             ]
                         },
                         numericRating: {
-                            $toInt: { "$reviews.response.rating" }
+                            $toInt: { $ifNull: ["$reviews.response.rating", "-1" ] } }
                         },
                         confidence: {
                             $ifNull: ["$reviews.response.sentiment.confidence", -1]
