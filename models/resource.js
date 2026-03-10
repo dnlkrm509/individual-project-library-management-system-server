@@ -76,16 +76,6 @@ class Resource {
                 },
                 {
                     $addFields: {
-                        hasReviewText: {
-                            $cond: [
-                                { $and: [
-                                    { $ne: ["$reviews.response.input", ""] },
-                                    { $ne: ["$reviews.response.input", null] }
-                                ]},
-                                1,
-                                0
-                            ]
-                        },
                         numericRating: {
                             $toInt: { $ifNull: ["$reviews.response.rating", "-1" ] }
                         },
@@ -154,16 +144,6 @@ class Resource {
                 },
                 {
                     $addFields: {
-                        hasReviewText: {
-                            $cond: [
-                                { $and: [
-                                    { $ne: ["$reviews.response.input", ""] },
-                                    { $ne: ["$reviews.response.input", null] }
-                                ]},
-                                1,
-                                0
-                            ]
-                        },
                         numericRating: {
                             $toInt: { $ifNull: ["$reviews.response.rating", "-1"] }
                         },
@@ -191,7 +171,6 @@ class Resource {
             },
             {
                 $sort: {
-                    hasReviewText: -1,
                     numericRating: -1,
                     confidence: -1
                 }
