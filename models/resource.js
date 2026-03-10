@@ -96,7 +96,7 @@ class Resource {
                 },
                 {
                     $sort: {
-                        hasReviewText: -1,
+                        
                         numericRating: -1,
                         confidence: -1
                     }
