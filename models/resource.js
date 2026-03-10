@@ -113,6 +113,7 @@ class Resource {
             },
             {
                 $sort: {
+                    hasReviewText: -1,
                     numericRating: -1,
                     confidence: -1
                 }
@@ -173,29 +174,30 @@ class Resource {
                     }
                 },
                 {
-                    $sort: {
-                        hasReviewText: -1,
-                        numericRating: -1,
-                        confidence: -1
-                    }
-                },
-                {
-                    $group: {
-                        _id: "$_id",
-                        resource: { $first: "$$ROOT" }
-                    }
-                },
-                {
-                    $replaceRoot: { newRoot: "$resource" }
-                },
-                {
-                    $sort: {
-                        hasReviewText: -1,
-                        numericRating: -1,
-                        confidence: -1
-                    }
+                $group: {
+                    _id: "$_id",
+                    resource: { $first: "$$ROOT" },
+                    maxRating: { $max: "$numericRating" },
+                    maxConfidence: { $max: "$confidence" }
                 }
-            ])
+            },
+            {
+                $addFields: {
+                    "resource.numericRating": "$maxRating",
+                    "resource.confidence": "$maxConfidence"
+                }
+            },
+            {
+                $replaceRoot: { newRoot: "$resource" }
+            },
+            {
+                $sort: {
+                    hasReviewText: -1,
+                    numericRating: -1,
+                    confidence: -1
+                }
+            }
+        ])
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage)
             .toArray()
