@@ -136,6 +136,9 @@ class Resource {
             db.collection('resources')
             .aggregate([
                 {
+                    $match: query
+                },
+                {
                     $lookup: {
                         from: "reviews",
                         localField: "_id",
