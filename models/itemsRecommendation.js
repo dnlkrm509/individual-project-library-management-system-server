@@ -3,7 +3,7 @@ const mongodb = require('mongodb');
 const getDb = require('../util/database').getDb;
 
 class ItemRecommendation {
-    static async findByID(resourceId) {
+    static async findByID(resourceId, query) {
       const db = getDb();
 
       return db.collection('items-recommendation')
@@ -16,6 +16,11 @@ class ItemRecommendation {
 
           { $unwind: "$itemRecommendation" },
 
+          {
+            $match: {
+              "itemRecommendation.itemId": { $nin: query.borrowedItemsIds }
+            }
+          },
           {
             $lookup: {
               from: "items-recommendation",

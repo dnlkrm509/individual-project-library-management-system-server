@@ -74,7 +74,7 @@ exports.getSearch = async (req, res, next) => {
                 yearQuery = { publicationYear: { $gte: min, $lte: max } };
             }
         }
-        
+
         const query = {
             _id: { $nin: borrowedItemsIds },
             $or: [
@@ -85,18 +85,18 @@ exports.getSearch = async (req, res, next) => {
                     yearQuery,
                     { availableStatus: searchNum }])
                 ]
-            };
-            Resource.fetchAllWithQuery(page, ITEMS_PER_PAGE, query)
-            .then(resourceData => {
-                const borrowedItemsIds = req.user.borrowedItems.resources.map(BI => BI.resourceId);
-                let resources = [ ...resourceData.resources ];
-                borrowedItemsIds.forEach(BIid => {
-                    return resources = resources.filter(r => {
-                        return BIid.toString() !== r._id.toString();
-                    })
+        };
+        Resource.fetchAllWithQuery(page, ITEMS_PER_PAGE, query)
+        .then(resourceData => {
+            const borrowedItemsIds = req.user.borrowedItems.resources.map(BI => BI.resourceId);
+            let resources = [ ...resourceData.resources ];
+            borrowedItemsIds.forEach(BIid => {
+                return resources = resources.filter(r => {
+                    return BIid.toString() !== r._id.toString();
                 })
-                res.status(200)
-                .json({
+            })
+            res.status(200)
+            .json({
                 resources,
                 loggedInUser: req.user,
                 userId: req.userId,
@@ -187,7 +187,13 @@ exports.getRecommendation = (req, res, next) => {
     res.set("Cache-Control", "private, no-cache");
     res.set("Vary", "Authorization");
 
-    itemsRecommendation.findByID(resourceId)
+    const borrowedItemsIds = req.user
+    ? req.user.borrowedItems.resources.map(b => (b.resourceId))
+    : [];
+    const query = {
+        borrowedItemsIds
+    }
+    itemsRecommendation.findByID(resourceId, query)
     .then(resourceData => {
         const resourcePromise = resourceData.map(item => {
             return Resource.findById(item.itemId);
