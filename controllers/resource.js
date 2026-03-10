@@ -46,7 +46,7 @@ exports.getSearch = async (req, res, next) => {
     const searchText = req.query.search;
     const page = +req.query.page || 1;
     
-    isAuthenticate = false;
+    let isAuthenticate = false;
     if (req.user) {
         isAuthenticate = !!req.user;
     }
@@ -54,7 +54,7 @@ exports.getSearch = async (req, res, next) => {
     res.set("Cache-Control", "private, no-cache");
     res.set("Vary", "Authorization");
     // console.log(searchText)
-    const borrowedItemsIds = req.user
+    const borrowedItemsIds = isAuthenticate
     ? req.user.borrowedItems.resources.map(b => (b.resourceId))
     : [];
     
@@ -88,13 +88,8 @@ exports.getSearch = async (req, res, next) => {
         };
         Resource.fetchAllWithQuery(page, ITEMS_PER_PAGE, query)
         .then(resourceData => {
-            const borrowedItemsIds = req.user.borrowedItems.resources.map(BI => BI.resourceId);
             let resources = [ ...resourceData.resources ];
-            borrowedItemsIds.forEach(BIid => {
-                return resources = resources.filter(r => {
-                    return BIid.toString() !== r._id.toString();
-                })
-            })
+            
             res.status(200)
             .json({
                 resources,
@@ -120,13 +115,8 @@ exports.getSearch = async (req, res, next) => {
         }
         Resource.fetchAllWithQuery(page, ITEMS_PER_PAGE, query)
         .then(resourceData => {
-            const borrowedItemsIds = req.user.borrowedItems.resources.map(BI => BI.resourceId);
             let resources = [ ...resourceData.resources ];
-            borrowedItemsIds.forEach(BIid => {
-                return resources = resources.filter(r => {
-                    return BIid.toString() !== r._id.toString();
-                })
-            })
+            
             res.status(200)
             .json({
                 resources,
@@ -187,7 +177,7 @@ exports.getRecommendation = (req, res, next) => {
     res.set("Cache-Control", "private, no-cache");
     res.set("Vary", "Authorization");
 
-    const borrowedItemsIds = req.user
+    const borrowedItemsIds = isAuthenticated
     ? req.user.borrowedItems.resources.map(b => (b.resourceId))
     : [];
     const query = {
