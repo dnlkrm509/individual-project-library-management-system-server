@@ -45,21 +45,24 @@ exports.getFile = (req, res, next) => {
 exports.getSearch = async (req, res, next) => {
     const searchText = req.query.search;
     const page = +req.query.page || 1;
-
+    
     isAuthenticate = false;
     if (req.user) {
         isAuthenticate = !!req.user;
     }
-
+    
     res.set("Cache-Control", "private, no-cache");
     res.set("Vary", "Authorization");
     // console.log(searchText)
-
+    const borrowedItemsIds = req.user
+    ? req.user.borrowedItems.resources.map(b => (b.resourceId))
+    : [];
+    
     if (searchText) {
-    //     // Perform search with query
+        //     // Perform search with query
         const searchNum = Number(searchText);
         let yearQuery = 0;
-
+        
         if (!isNaN(searchNum)) {
             if (searchText.length === 4) {
                 yearQuery = { publicationYear: searchNum };
@@ -67,11 +70,13 @@ exports.getSearch = async (req, res, next) => {
                 const factor = Math.pow(10, 4 - searchText.length);
                 const min = searchNum * factor;
                 const max = min + factor - 1;
-
+                
                 yearQuery = { publicationYear: { $gte: min, $lte: max } };
             }
         }
+        
         const query = {
+            _id: { $nin: borrowedItemsIds },
             $or: [
                 { title: { $regex: searchText, $options: 'i' } },
                 { author: { $regex: searchText, $options: 'i' } },
@@ -79,51 +84,68 @@ exports.getSearch = async (req, res, next) => {
                 ...(isNaN(searchNum) ? [] : [
                     yearQuery,
                     { availableStatus: searchNum }])
-            ]
-        };
-        Resource.fetchAllWithQuery(page, ITEMS_PER_PAGE, query)
-    .then(resourceData => {
-        res.status(200)
-        .json({
-            resources: resourceData.resources,
-            loggedInUser: req.user,
-            userId: req.userId,
-            isAuthenticated: isAuthenticate,
-            previousPage: page - 1,
-            currentPage: page,
-            nextPage: page + 1,
-            lastPage: Math.ceil(resourceData.itemsCount / ITEMS_PER_PAGE),
-            hasPreviousPage: page > 1,
-            hasNextPage: (page * ITEMS_PER_PAGE) < resourceData.itemsCount
+                ]
+            };
+            Resource.fetchAllWithQuery(page, ITEMS_PER_PAGE, query)
+            .then(resourceData => {
+                const borrowedItemsIds = req.user.borrowedItems.resources.map(BI => BI.resourceId);
+                let resources = [ ...resourceData.resources ];
+                borrowedItemsIds.forEach(BIid => {
+                    return resources = resources.filter(r => {
+                        return BIid.toString() !== r._id.toString();
+                    })
+                })
+                res.status(200)
+                .json({
+                resources,
+                loggedInUser: req.user,
+                userId: req.userId,
+                isAuthenticated: isAuthenticate,
+                previousPage: page - 1,
+                currentPage: page,
+                nextPage: page + 1,
+                lastPage: Math.ceil(resourceData.itemsCount / ITEMS_PER_PAGE),
+                hasPreviousPage: page > 1,
+                hasNextPage: (page * ITEMS_PER_PAGE) < resourceData.itemsCount
+            });
+        })
+        .catch(err => {
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            return next(error);
         });
-    })
-    .catch(err => {
-        const error = new Error(err);
-        error.httpStatusCode = 500;
-        return next(error);
-    });
     } else {
-        Resource.fetchAll(page, ITEMS_PER_PAGE)
-    .then(resourceData => {
-        res.status(200)
-        .json({
-            resources: resourceData.resources,
-            loggedInUser: req.user,
-            userId: req.userId,
-            isAuthenticated: isAuthenticate,
-            previousPage: page - 1,
-            currentPage: page,
-            nextPage: page + 1,
-            lastPage: Math.ceil(resourceData.itemsCount / ITEMS_PER_PAGE),
-            hasPreviousPage: page > 1,
-            hasNextPage: (page * ITEMS_PER_PAGE) < resourceData.itemsCount
+        const query = {
+            _id: { $nin: borrowedItemsIds }
+        }
+        Resource.fetchAllWithQuery(page, ITEMS_PER_PAGE, query)
+        .then(resourceData => {
+            const borrowedItemsIds = req.user.borrowedItems.resources.map(BI => BI.resourceId);
+            let resources = [ ...resourceData.resources ];
+            borrowedItemsIds.forEach(BIid => {
+                return resources = resources.filter(r => {
+                    return BIid.toString() !== r._id.toString();
+                })
+            })
+            res.status(200)
+            .json({
+                resources,
+                loggedInUser: req.user,
+                userId: req.userId,
+                isAuthenticated: isAuthenticate,
+                previousPage: page - 1,
+                currentPage: page,
+                nextPage: page + 1,
+                lastPage: Math.ceil(resourceData.itemsCount / ITEMS_PER_PAGE),
+                hasPreviousPage: page > 1,
+                hasNextPage: (page * ITEMS_PER_PAGE) < resourceData.itemsCount
+            });
+        })
+        .catch(err => {
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            return next(error);
         });
-    })
-    .catch(err => {
-        const error = new Error(err);
-        error.httpStatusCode = 500;
-        return next(error);
-    });
     }
 }
 
