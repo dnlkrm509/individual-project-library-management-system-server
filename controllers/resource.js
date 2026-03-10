@@ -186,7 +186,13 @@ exports.getRecommendation = (req, res, next) => {
     itemsRecommendation.findByID(resourceId, query)
     .then(resourceData => {
         const resourcePromise = resourceData.map(item => {
-            return Resource.findById(item.itemId);
+            return Resource.findById(item.itemId)
+            .then(resource => {
+                return {
+                    ...resource,
+                    relationshipScore: item.score
+                }
+            })
         });
 
         return Promise.all(resourcePromise)
