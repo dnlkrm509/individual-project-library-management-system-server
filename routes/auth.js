@@ -11,14 +11,25 @@ router.post('/login',
             'email', 
             'Please enter a valid email.'
         )
+        .custom((value, { req }) => {
+            return getDB().collection('users').findOne({ email: value })
+            .then(user => {
+                if(!user) {
+                    return Promise.reject('E-Mail does not exist. Try again.')
+                }
+            })
+        })
         .isEmail()
         .normalizeEmail(),
         body('password')
         .isLength({min: 8, max: 16})
         .withMessage('Password must be between 8 and 16 characters long.')
+        .matches(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,16}$/)
+        .withMessage('Password must include at least one lowercase letter, one uppercase letter, one number, one special character, and no spaces.')
         .trim()
     ],
-    authController.postLogin);
+    authController.postLogin
+);
 router.post('/signup', 
     [
         body(

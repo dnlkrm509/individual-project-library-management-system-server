@@ -17,6 +17,18 @@ exports.postLogin = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
     
+    if (email === null || password === null) {
+        return res.status(404).json({ error: true, errorMessage: "Inputs cannot be null." });
+    }
+
+    if (email === undefined || password === undefined) {
+        return res.status(404).json({ error: true, errorMessage: "Inputs cannot be undefined." });
+    }
+
+    if (email.length <= 0 || password.length <= 0) {
+        return res.status(422).json({ error: true, errorMessage: "None of fields can be left empty." });
+    }
+
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -87,7 +99,20 @@ exports.postLogin = (req, res, next) => {
 exports.postSignup = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
+    const confirmPassword = req.body.confirmPassword;
     
+    if (email === null || password === null || confirmPassword === null) {
+        return res.status(404).json({ error: true, msg: "Inputs cannot be null." });
+    }
+
+    if (email === undefined || password === undefined || confirmPassword === undefined) {
+        return res.status(404).json({ error: true, msg: "Inputs cannot be undefined." });
+    }
+
+    if (email.length <= 0 || password.length <= 0 || confirmPassword.length <= 0) {
+        return res.status(422).json({ error: true, msg: "None of fields can be left empty." });
+    }
+
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
