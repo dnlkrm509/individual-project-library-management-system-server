@@ -102,15 +102,15 @@ exports.postSignup = (req, res, next) => {
     const confirmPassword = req.body.confirmPassword;
     
     if (email === null || password === null || confirmPassword === null) {
-        return res.status(404).json({ error: true, msg: "Inputs cannot be null." });
+        return res.status(404).json({ error: true, errorMessage: "Inputs cannot be null." });
     }
 
     if (email === undefined || password === undefined || confirmPassword === undefined) {
-        return res.status(404).json({ error: true, msg: "Inputs cannot be undefined." });
+        return res.status(404).json({ error: true, errorMessage: "Inputs cannot be undefined." });
     }
 
     if (email.length <= 0 || password.length <= 0 || confirmPassword.length <= 0) {
-        return res.status(422).json({ error: true, msg: "None of fields can be left empty." });
+        return res.status(422).json({ error: true, errorMessage: "None of fields can be left empty." });
     }
 
     const errors = validationResult(req);
@@ -158,13 +158,13 @@ exports.postReset = (req, res, next) => {
     const email = req.body.email;
     crypto.randomBytes(32, (err, buffer) => {
         if(err) {
-            return res.status(500).json({ message: 'An error happen creating the token.' });
+            return res.status(500).json({ errorMessage: 'An error happen creating the token.' });
         }
         const token = buffer.toString('hex');
         User.findByEmail(email)
         .then(user => {
             if (!user) {
-                return res.status(404).json({ message: 'No account with that email found.' });
+                return res.status(404).json({ errorMessage: 'No account with that email found.' });
             }
         
             const newUser = new User(user.email, user.password, user.role, user.borrowedItems, user._id.toString(), token, Date.now() + 3600000);
@@ -196,7 +196,7 @@ exports.getNewPassword = (req, res, next) => {
     User.findByPasswordToken(token)
     .then(user => {
         if (!user) {
-            return res.status(404).json({ message: 'No account found.' });
+            return res.status(404).json({ errorMessage: 'No account found.' });
         }
         res.redirect(`https://dnlkrm509.github.io/individual-project-library-management-system-client/auth/new-password.html?token=${token}&userId=${user._id.toString()}`);
     })
@@ -213,7 +213,7 @@ exports.postNewPassword = (req, res, next) => {
     const password = req.body.password;
 
     if (!token || !userId || !password) {
-        return res.status(400).json({ message: 'Invalid or missing data.' });
+        return res.status(400).json({ errorMessage: 'Invalid or missing data.' });
     }
 
     let resetUser;

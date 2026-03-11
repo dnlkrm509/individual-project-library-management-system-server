@@ -31,7 +31,7 @@ app.use(authRoutes);
 
 app.use((error, req, res, next) => {
   console.error(error);
-  res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  res.status(500).json({ errorMessage: 'Internal Server Error', error: error.message });
 });
 
 mongoConnect(() => {
