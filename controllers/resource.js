@@ -264,7 +264,7 @@ exports.postSentiment = async (req, res, next) => {
     
     let response = {
         input: text,
-        useRaring: rating
+        rating
     };
     
     const db = getDb();
@@ -298,11 +298,10 @@ exports.postSentiment = async (req, res, next) => {
 
         response = {
             ...response,
-            rating: combinedScore,
             sentiment: {
                 label,
                 score,
-                confidence: sentimentValue
+                confidence: combinedScore
             }
         };
 
