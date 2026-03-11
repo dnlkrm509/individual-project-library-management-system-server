@@ -12,7 +12,7 @@ router.post('/login',
             'Please enter a valid email.'
         )
         .custom((value, { req }) => {
-            return getDB().collection('users').findOne({ email: value })
+            return User.findByEmail(value)
             .then(user => {
                 if(!user) {
                     return Promise.reject('E-Mail does not exist. Try again.')

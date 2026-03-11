@@ -264,34 +264,41 @@ exports.postSentiment = async (req, res, next) => {
     
     let response = {
         input: text,
-        rating
+        useRaring: rating
     };
     
     const db = getDb();
     const itemId = new mongodb.ObjectId(resourceId);
     let newConfidence = null;
     console.log(response)
+    const cleanText = text?.slice(0, 500) || "";
     
     try {
         const result = await client.textClassification({
-            model: "cardiffnlp/twitter-roberta-base-sentiment-latest",
-            inputs: text,
+            model: "siebert/sentiment-roberta-large-english",
+            inputs: cleanText,
         });
 
         const label = result[0].label;
         const score = result[0].score;
 
         let multiplier = 0;
-        if (label === 'negative') {
+        if (score < 0.6) {
+            multiplier = 0;
+        } else if (label.toLowerCase() === 'negative') {
             multiplier = -1;
-        } else if (label === 'positive') {
+        } else if (label.toLowerCase() === 'positive') {
             multiplier = 1;
         }
         
         const sentimentValue = score * multiplier;
+        // in case where user rates 5 star to a book but leaves a negative review
+        const ratingNormalized = (rating - 3) / 2;
+        const combinedScore = (sentimentValue * 0.7) + (ratingNormalized * 0.3);
 
         response = {
             ...response,
+            rating: combinedScore,
             sentiment: {
                 label,
                 score,
@@ -304,7 +311,7 @@ exports.postSentiment = async (req, res, next) => {
         const previousSum = item?.confidenceSum || 0;
         const previousCount = item?.reviewCount || 0;
 
-        const newSum = previousSum + sentimentValue;
+        const newSum = previousSum + combinedScore;
         const newCount = previousCount + 1;
 
         newConfidence = newSum / newCount;
