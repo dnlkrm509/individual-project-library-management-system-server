@@ -35,22 +35,27 @@ class User {
             return BR.resourceId.toString() === resource._id.toString();
         });
         let availableStatus = resource.availableStatus;
+        let copies = resource.copies;
         let updatedBorrowedResources = [ ...this.borrowedItems.resources ];
         const db = getDb();
         
+
         if (borrowedResourceIntex >= 0) {
             // Return the existing resource
             
-            availableStatus = !availableStatus;
+            if (!availableStatus) availableStatus = !availableStatus;
             updatedBorrowedResources = updatedBorrowedResources.filter(UBR => {
                 return UBR.resourceId.toString() !== resource._id.toString();
             })
             
-            this.#borrowedHistory(resource._id);
+            this.#borrowedHistory(resource._id, availableStatus);
         } else {
             // Borrow as a new borrowed resource
-            
-            availableStatus = !availableStatus;
+            if (copies === 0) {
+                return;
+            } else if (copies === 1) {
+                availableStatus = !availableStatus;
+            }
             const currentDate = new Date();
             const futureDate = new Date();
             futureDate.setDate(currentDate.getDate() + 10);
@@ -58,6 +63,19 @@ class User {
             updatedBorrowedResources.push({
                 resourceId: new mongodb.ObjectId(resource._id), dueDate: futureDate
             });
+            
+            copies -= 1;
+            db
+            .collection('resources')
+            .updateOne(
+                { _id: resource._id },
+                { $set: {
+                        availableStatus,
+                        copies
+                    }
+                }
+            )
+
             db
             .collection('reports')
             .insertOne({
@@ -65,6 +83,7 @@ class User {
                 email: this.email,
                 resourceId: new mongodb.ObjectId(resource._id),
                 resourceTitle: resource.title,
+                copies: copies,
                 borrowDate: currentDate,
                 dueDate: futureDate,
                 returned: false
@@ -74,14 +93,6 @@ class User {
         const updatedBorrowed = {
             resources: updatedBorrowedResources
         };
-
-        db
-        .collection('resources')
-        .updateOne(
-            { _id: resource._id },
-            { $set: { availableStatus: availableStatus } }
-        )
-
         return db
         .collection('users')
         .updateOne(
@@ -166,23 +177,27 @@ class User {
         .catch(err => console.log(err))
     }
     
-    #borrowedHistory(resourceId) {
+    #borrowedHistory(resourceId, availableStatus) {
         const db = getDb();
+        let copies;
         return this.getBorrowed()
         .then(borrowedResources => {
             let updatedBorrowedResources = borrowedResources.map(BR => {
                 if (BR._id.toString() === resourceId.toString()) {
+                    copies = BR.copies + 1;
                     return {
                         ...BR,
+                        copies,
+                        availableStatus,
                         returnedDate: new Date()
                     }
                 }
             });
-
+            
             updatedBorrowedResources = updatedBorrowedResources.filter(UBR => {
                 return !!UBR;
             });
-
+            
             const borrowedHistory = {
                 resources: updatedBorrowedResources,
                 user: {
@@ -192,12 +207,24 @@ class User {
             };
             
             db.collection('borrowed-history').insertOne(borrowedHistory)
+            db
+            .collection('resources')
+            .updateOne(
+                { _id: resourceId },
+                { $set: {
+                    availableStatus,
+                    copies
+                }
+                }
+            )
+            
             return db
             .collection('reports')
             .updateOne(
-                { resourceId: new mongodb.ObjectId(resourceId), userId: this._id },
+                { resourceId: resourceId, userId: this._id },
                 {
                     $set: {
+                        copies,
                         returned: true,
                         returnedDate: new Date()
                     }

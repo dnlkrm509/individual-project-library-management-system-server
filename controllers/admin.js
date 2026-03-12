@@ -8,6 +8,7 @@ exports.postAddResource = (req, res, next) => {
     const author = req.body.author;
     const publicationYear = req.body.year;
     const genre = req.body.genre;
+    const copies = req.body.copies;
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -17,7 +18,7 @@ exports.postAddResource = (req, res, next) => {
         });
     }
 
-    const resource = new Resource(title, author, Number(publicationYear), genre, null, req.user._id, true);
+    const resource = new Resource(title, author, Number(publicationYear), genre, Number(copies), null, req.user._id, true);
     resource.save()
     .then(result => {
         console.log('New Resource Created!');
@@ -119,6 +120,7 @@ exports.putEditResource = (req, res, next) => {
     const author = req.body.author;
     const publicationYear = req.body.year;
     const genre = req.body.genre;
+    const copies = req.body.copies;
     const availableStatus = req.body.availableStatus || true;
     const errors = validationResult(req);
 
@@ -139,7 +141,7 @@ exports.putEditResource = (req, res, next) => {
             return res.status(403).json({ message: 'Not authorized.' });
         }
 
-        const newResource = new Resource(title, author, Number(publicationYear), genre, resourceId, req.user._id, availableStatus);
+        const newResource = new Resource(title, author, Number(publicationYear), genre, Number(copies), resourceId, req.user._id, availableStatus);
         return newResource.save()
         .then(result => {
             console.log('updated resource');

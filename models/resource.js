@@ -3,11 +3,12 @@ const mongodb = require('mongodb');
 const getDb = require('../util/database').getDb;
 
 class Resource {
-    constructor(title, author, publicationYear, genre, resourceId, userId, availableStatus) {
+    constructor(title, author, publicationYear, genre, copies, resourceId, userId, availableStatus) {
         this.title = title;
         this.author = author;
         this.publicationYear = publicationYear;
         this.genre = genre;
+        this.copies = copies;
         this._id = resourceId ? new mongodb.ObjectId(resourceId) : null;
         this.userId = userId;
         this.availableStatus = availableStatus;

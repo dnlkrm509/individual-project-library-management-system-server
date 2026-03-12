@@ -8,17 +8,25 @@ class Report {
         if (status === 'all') {
             return db
             .collection('reports')
-            .find()
+            .aggregate([
+                { $sort: { returnedDate: -1 } }
+            ])
             .toArray()
         } else if (status === 'returned') {
             return db
             .collection('reports')
-            .find({ returned: true })
+            .aggregate([
+                { $match: { returned: true } },
+                { $sort: { returnedDate: -1 } }
+            ])
             .toArray()
         } else {
             return db
             .collection('reports')
-            .find({ returned: false })
+            .aggregate([
+                { $match: { returned: false } },
+                { $sort: { returnedDate: -1 } }
+            ])
             .toArray()
         }
     }
