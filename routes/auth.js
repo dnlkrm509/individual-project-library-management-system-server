@@ -8,9 +8,10 @@ const authController = require('../controllers/auth');
 router.post('/login', 
     [
         body(
-            'email'
+            'email', 
+            'Please enter a valid email.'
         )
-        .withMessage('Please enter a valid email.')
+        .isEmail()
         .custom((value, { req }) => {
             return User.findByEmail(value)
             .then(user => {
@@ -19,7 +20,6 @@ router.post('/login',
                 }
             })
         })
-        .isEmail()
         .normalizeEmail(),
         body('password')
         .isLength({min: 8, max: 16})
@@ -37,7 +37,6 @@ router.post('/signup',
             'Please enter a valid email.'
         )
         .isEmail()
-        .withMessage('Password must include at least one lowercase letter, one uppercase letter, one number, one special character, and no spaces.')
         .custom((value, { req }) => {
             return User.findByEmail(value)
             .then(user => {
