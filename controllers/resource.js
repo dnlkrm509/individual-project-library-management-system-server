@@ -75,16 +75,26 @@ exports.getSearch = async (req, res, next) => {
             }
         }
 
+        const booleanQuery =
+            searchText.toLowerCase() === "true"
+                ? true
+                : searchText.toLowerCase() === "false"
+                ? false
+                : null;
+
         const query = {
             _id: { $nin: borrowedItemsIds },
             $or: [
-                { title: { $regex: searchText, $options: 'i' } },
-                { author: { $regex: searchText, $options: 'i' } },
-                { genre: { $regex: searchText, $options: 'i' } },
-                ...(isNaN(searchNum) ? [] : [
-                    yearQuery,
-                    { availableStatus: searchNum }])
-                ]
+                    { title: { $regex: searchText, $options: 'i' } },
+                    { author: { $regex: searchText, $options: 'i' } },
+                    { genre: { $regex: searchText, $options: 'i' } },
+                    ...(booleanQuery !== null ? [{ availableStatus: booleanQuery }]: []),
+                    ...(isNaN(searchNum) ? [] 
+                    : [
+                        yearQuery,
+                        { copies: searchNum },
+                        { numericRating: searchNum }])
+                    ]
         };
         Resource.fetchAllWithQuery(page, ITEMS_PER_PAGE, query)
         .then(resourceData => {
