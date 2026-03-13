@@ -165,9 +165,6 @@ class Resource {
             db.collection('resources')
             .aggregate([
                 {
-                    $match: query
-                },
-                {
                     $lookup: {
                         from: "reviews",
                         localField: "_id",
@@ -207,6 +204,9 @@ class Resource {
             },
             {
                 $replaceRoot: { newRoot: "$resource" }
+            },
+            {
+                $match: query
             },
             {
                 $sort: {

@@ -18,7 +18,7 @@ const BorrowedHistory = require('../models/borrowedHistory');
 const itemsRecommendation = require('../models/itemsRecommendation');
 const Reviews = require('../models/reviews');
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 50;
 
 exports.getFile = (req, res, next) => {
     const filename = req.params.filename;
