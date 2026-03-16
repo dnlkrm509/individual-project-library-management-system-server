@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const express = require('express');
 const cors = require('cors');
 
-const mongoConnect = require('./util/database').connectToDatabase;
+const mongoConnect = require('./util/database').mongoConnect;
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');

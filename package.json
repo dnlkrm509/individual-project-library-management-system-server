@@ -23,7 +23,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.17.0",
     "pdfkit": "^0.17.1",
-    "properties-reader": "^3.0.1",
+    "properties-reader": "^2.3.0",
     "resend": "^4.6.0",
     "stripe": "^18.2.1"
   }

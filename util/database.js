@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const propertiesPath = require('properties-reader');
+const propertiesReader = require('properties-reader');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 
@@ -58,5 +58,5 @@ function getDb() {
     throw 'No database found';
 }
 
-exports.getDB = getDb;
-exports.connectToDatabase = connectToDatabase;
+exports.mongoConnect = connectToDatabase;
+exports.getDb = getDb;
