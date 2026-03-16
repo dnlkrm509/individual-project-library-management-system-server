@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const propertiesReader = require('properties-reader');
+const propertiesPath = require('properties-reader');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 
