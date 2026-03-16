@@ -34,10 +34,8 @@ app.use((error, req, res, next) => {
   res.status(500).json({ errorMessage: 'Internal Server Error', error: error.message });
 });
 
-const PORT = 4000;
-
-mongoConnect(() => {
-  app.listen(process.env.PORT || PORT, () => {
-    console.log('Server started on port', process.env.PORT || PORT);
-  });
+app.listen(process.env.PORT || 4000, () => {
+  console.log('Server started on port', 4000);
 });
+
+mongoConnect();
